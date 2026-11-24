@@ -1,12 +1,143 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Enterprise automated dependency maintenance and security patch policy.",
   "extends": [
     "config:recommended",
-    ":dependencyDashboard"
+    ":dependencyDashboard",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests",
+    ":maintainLockFilesWeekly",
+    ":automergeBranch"
+  ],
+  "timezone": "UTC",
+  "schedule": [
+    "before 5am on monday"
+  ],
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 2,
+  "stabilityDays": 3,
+  "rebaseWhen": "behind-base-branch",
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "labels": [
+    "dependencies",
+    "renovate",
+    "automated"
+  ],
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security",
+      "vulnerability"
+    ],
+    "semanticCommitType": "fix",
+    "semanticCommitScope": "security",
+    "schedule": [
+      "at any time"
+    ],
+    "automerge": true,
+    "platformAutomerge": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Parse tool versions in Dockerfiles defined as ARG TOOL_VERSION=x.y.z",
+      "fileMatch": [
+        "(^|/)Dockerfile$",
+        "(^|/)Dockerfile\\.[a-zA-Z0-9_.-]+$"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: versioning=(?<versioning>[a-z-]+?))?\\s+ARG\\s+[A-Z_]+_VERSION=(?<currentValue>.+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Parse tool versions declared in Makefiles",
+      "fileMatch": [
+        "(^|/)Makefile$",
+        "(^|/)GNUmakefile$"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)\\s+[A-Z_]+_VERSION\\s*\\??=\\s*(?<currentValue>.+)"
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Parse GitHub Actions runner image versions in workflows",
+      "fileMatch": [
+        "^\\.github/workflows/[^/]+\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)\\s+image:\\s*(?<currentValue>[^\\s]+)"
+      ]
+    }
   ],
   "packageRules": [
     {
-      "matchUpdateTypes": ["patch", "pin", "digest"],
+      "description": "Immediate security patch fast-track",
+      "matchUpdateTypes": [
+        "patch"
+      ],
+      "matchCurrentVersion": "!/^0/",
+      "matchConfidence": "high",
+      "automerge": true,
+      "platformAutomerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Group all GitHub Action digest and patch updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "GitHub Actions pin & updates",
+      "automerge": true,
+      "platformAutomerge": true
+    },
+    {
+      "description": "Group core React monorepo packages",
+      "matchPackagePatterns": [
+        "^react",
+        "^@types/react"
+      ],
+      "groupName": "React ecosystem monorepo"
+    },
+    {
+      "description": "Group AWS SDK v3 client packages",
+      "matchPackagePatterns": [
+        "^@aws-sdk/"
+      ],
+      "groupName": "AWS SDK v3 monorepo"
+    },
+    {
+      "description": "Group OpenTelemetry instrumentation libraries",
+      "matchPackagePatterns": [
+        "^@opentelemetry/",
+        "^go.opentelemetry.io/"
+      ],
+      "groupName": "OpenTelemetry observability suite"
+    },
+    {
+      "description": "Require manual approval for major upgrades",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true,
+      "automerge": false,
+      "labels": [
+        "dependencies",
+        "major-upgrade",
+        "breaking-change"
+      ],
+      "commitMessagePrefix": "feat(deps)!:"
+    },
+    {
+      "description": "Disable noisy lockfile updates for dev utilities",
+      "matchDepTypes": [
+        "devDependencies"
+      ],
+      "matchUpdateTypes": [
+        "pin",
+        "digest"
+      ],
       "automerge": true
     }
   ]

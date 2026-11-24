@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "=========================================="
-echo "      ENTERPRISE COMPONENT HEALTH CHECK   "
-echo "=========================================="
-echo "Timestamp : $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-echo "Status    : ALL SYSTEMS OPERATIONAL"
-echo "Health    : 100% HEALTHY"
-echo "=========================================="
+echo "=== Renovate Bot Suite Healthcheck ==="
+python3 --version
+bash scripts/validate-config.sh
+echo "[OK] Healthcheck passed."
 exit 0

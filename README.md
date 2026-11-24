@@ -1,128 +1,86 @@
-# :rocket: Renovate Automated Dependency Updater
+# Enterprise Renovate Automated Dependency Maintenance
 
-<div align="center">
+[![CI Validation](https://github.com/tayyabmasood911/renovate-automated-dependency-updater/actions/workflows/ci.yml/badge.svg)](https://github.com/tayyabmasood911/renovate-automated-dependency-updater/actions)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Renovate](https://img.shields.io/badge/Renovate-Enterprise%20Ready-brightgreen.svg)](https://docs.renovatebot.com)
+[![Automerge](https://img.shields.io/badge/Automerge-Branch%20Protected-blue.svg)](#)
 
-[![Status](https://img.shields.io/badge/status-production--ready-brightgreen?style=for-the-badge&logo=git)]()
-[![Domain](https://img.shields.io/badge/domain-DevSecOps--and--CI/CD-blueviolet?style=for-the-badge)]()
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge&logo=github)](https://github.com/T9113/renovate-automated-dependency-updater/pulls)
-[![Security Hardened](https://img.shields.io/badge/security-hardened-red?style=for-the-badge&logo=shield)]()
-
-</div>
+An enterprise-grade Renovate Bot configuration suite engineered for automated software dependency hygiene, vulnerability patch fast-tracking, regex-based custom tool management, semantic commit adherence, and safe automerging.
 
 ---
 
-## :memo: Executive Summary
+## Architectural Blueprint
 
-**Renovate Automated Dependency Updater** is an enterprise-grade production engineering implementation designed for mission-critical deployments. Built to meet stringent requirements for **99.99% availability**, zero-trust security boundaries, automated resilience, and seamless CI/CD delivery.
+The Renovate maintenance pipeline pairs upstream registries, CVE security advisories, AST manifests, and custom regex parsers with intelligent grouping and automerge safeguards.
 
-Key operational outcomes:
-- **Resilience:** Multi-zone high availability with automated fault detection and recovery.
-- **Scalability:** Elastic horizontal scaling responsive to real-time workload demand.
-- **Security:** Strict adherence to least-privilege RBAC, encrypted communications, and zero committed secrets.
-- **Maintainability:** Modular, declarative configuration aligned with cloud-native industry standards.
+![Renovate Architecture](docs/architecture.svg)
 
 ---
 
-## :building_construction: System Architecture
+## Core Enterprise Capabilities
 
-```text
-+-------------------------------------------------------------------------------+
-|                       Renovate Automated Dependency Updater Architecture Blueprint                    |
-|                                                                               |
-|   [Client Ingress] ===> [API Gateway / Traffic Router (TLS 1.3 / mTLS)]       |
-|                                     |                                         |
-|                                     v                                         |
-|                         [Core Workload Cluster]                               |
-|                         (Multi-Replica / Multi-AZ)                            |
-|                                     |                                         |
-|                 +-------------------+-------------------+                     |
-|                 |                                       |                     |
-|                 v                                       v                     |
-|     [Persistence & Storage Layer]           [Observability & Telemetry Engine]|
-|      (Encrypted at Rest / KMS)              (Prometheus / OTLP / OpenSearch)  |
-+-------------------------------------------------------------------------------+
+- **Automated Security Patch Fast-Track:** Immediately pulls upstream CVE patches from GHSA/OSV advisories (`schedule: at any time`), assigns `fix(security)` semantic commits, and automerges upon green test suites.
+- **Custom Regex Managers:** Extends Renovate beyond standard lockfiles to track pinned tool versions inside `Dockerfile` (`ARG TOOL_VERSION=...`) and `Makefile` (`TOOL_VERSION ?= ...`).
+- **Smart Monorepo Grouping:** Batches updates for complex multi-package monorepos (React, AWS SDK v3, OpenTelemetry) into single atomic pull requests, eliminating build breakages and notification spam.
+- **Branch Protection & Automerge:** Automatically merges non-breaking patch and digest updates directly via GitHub branch automerge, strictly gating merges on passing CI tests.
+- **Major Version Safety Gates:** Isolates breaking major updates behind mandatory Dependency Dashboard manual approval checkboxes with minimum 3-day stability buffers.
+
+---
+
+## Configuration Reference: `renovate.json`
+
+### Key Policy Attributes
+
+| Directive | Configuration | Impact |
+|:---|:---:|:---|
+| `schedule` | `before 5am on monday` | Prevents PR fatigue during working hours while leaving security patches unconstrained. |
+| `prConcurrentLimit` | `10` | Limits open dependency PRs to avoid overwhelming developer review queues. |
+| `prHourlyLimit` | `2` | Throttles CI runner load and GitHub token rate limits. |
+| `stabilityDays` | `3` | Withholds releases under 3 days old to protect against supply chain tampering. |
+| `semanticCommitType` | `chore` / `fix` / `feat!` | Standardizes Git commit log entries according to Conventional Commits. |
+
+---
+
+## Custom Regex Managers
+
+Renovate updates unmanaged tool binaries in non-standard manifests via regex comments:
+
+### 1. In `Dockerfile`:
+```dockerfile
+# renovate: datasource=github-releases depName=aquasecurity/trivy
+ARG TRIVY_VERSION=v0.58.2
+```
+
+### 2. In `Makefile`:
+```makefile
+# renovate: datasource=github-releases depName=hashicorp/terraform
+TERRAFORM_VERSION ?= 1.7.5
 ```
 
 ---
 
-## :sparkles: Key Enterprise Capabilities
+## Local Verification & Testing
 
-- :zap: **High Availability & Fault Tolerance:** Eliminates single points of failure via multi-node redundancy and health check probes.
-- :shield: **Zero-Trust Security Posture:** Enforces non-root runtime environments, ephemeral credentials, and automated vulnerability scanning.
-- :chart_with_upwards_trend: **Elastic Autoscaling:** Dynamic resource provisioning based on custom throughput, memory pressure, and queue depth.
-- :mag: **Full-Stack Observability:** Standardized structured telemetry, metrics instrumentation, and distributed request tracing.
-- :package: **GitOps & CI/CD Automation:** Infrastructure and configuration managed declaratively with automated testing and continuous deployment.
-
----
-
-## :file_folder: Repository Directory Structure
-
-```text
-.
-|-- config/              # Declarative configuration and environment definitions
-|-- src/                 # Production source code and manifests
-|-- scripts/             # Operational automation, setup, and maintenance scripts
-|-- tests/               # Comprehensive validation and unit test suites
-|-- LICENSE              # MIT Open Source License
-`-- README.md            # Enterprise architectural documentation
-```
-
----
-
-## :zap: Quick Start & Deployment
-
-### Prerequisites
-- Git `>= 2.40`
-- Docker Engine `>= 24.0` / Cloud CLI (AWS / GCP / Azure / Kubernetes)
-
-### Deployment Steps
 ```bash
-# 1. Clone the repository
-git clone https://github.com/T9113/renovate-automated-dependency-updater.git
-cd renovate-automated-dependency-updater
+# Execute unit test suite verifying schema and regex compilation
+python3 -m unittest discover -s tests -p "test_*.py"
 
-# 2. Inspect and configure environment parameters
-cp config/example.env config/.env
+# Validate JSON schema and regex patterns
+bash scripts/validate-config.sh
 
-# 3. Validate configurations and syntax
-# Run linters, dry-run validations, or unit test suites
-
-# 4. Deploy workloads / infrastructure
-# Execute deployment manifests or container runtime
+# Run healthcheck
+bash scripts/healthcheck.sh
 ```
 
 ---
 
-## :gear: Configuration Reference
+## Security Governance & Disclosure
 
-| Parameter | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `ENVIRONMENT` | string | `production` | Deployment environment target (`staging`, `production`) |
-| `LOG_LEVEL` | string | `info` | Structured logging verbosity (`debug`, `info`, `warn`, `error`) |
-| `METRICS_ENABLED` | boolean | `true` | Enables real-time Prometheus / OpenTelemetry telemetry export |
-| `TLS_MIN_VERSION` | string | `TLSv1.3` | Minimum allowable TLS protocol version for network traffic |
+For security vulnerabilities or supply chain concerns, consult our [Responsible Disclosure Policy](SECURITY.md) or contact maintainer **Tayyab Masood** at [tayyabmasood911@gmail.com](mailto:tayyabmasood911@gmail.com).
 
 ---
 
-## :lock: Security, Compliance & Governance
+## License
 
-1. **Least-Privilege Execution:** Services run under restricted service accounts with zero root permissions.
-2. **Encrypted Data In-Flight & At-Rest:** AES-256 / KMS envelope encryption for persistent state and TLS 1.3 for network transport.
-3. **Automated Supply Chain Security:** All dependencies and container images verified against CVE databases using Trivy and Semgrep.
-4. **Zero-Secret Guarantee:** No hardcoded tokens, passwords, or private keys exist in this codebase.
-
----
-
-## :bust_in_silhouette: Author & Maintainer
-
-**Tayyab Masood**  
-Cloud Solutions Architect & Senior DevOps Engineer  
-- :globe_with_meridians: **GitHub:** [@T9113](https://github.com/T9113)  
-- :scroll: **Certification:** AWS Certified Solutions Architect - Associate  
-
----
-
-## :page_facing_up: License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+Licensed under the MIT License. See [LICENSE](LICENSE) for details.
